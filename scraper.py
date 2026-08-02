@@ -17,9 +17,9 @@ SOURCES = [
         "url": "https://www.destination-cognac.com/agenda-cognac/"
     },
     {
-        "name": "Grand Cognac",
-        "url": "https://www.grand-cognac.fr/decouvrir-et-sortir/agenda-des-sorties"
-    }
+        "name": "Agenda Culturel Charente",
+        "url": "https://16.agendaculturel.fr/"
+    },
 ]
 
 
