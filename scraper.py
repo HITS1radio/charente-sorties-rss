@@ -57,6 +57,10 @@ MOTS_EXCLUS = [
     "cgv",
     "charente-maritime",
     "pyrenees"
+    "guide",
+"agenda",
+"departement",
+"region"
 ]
 
 
@@ -146,13 +150,24 @@ def get_events():
                     continue
 
 
-                # Filtre Cognac et alentours
+# Suppression des zones trop éloignées
 
-                if not any(
-                    ville in texte
-                    for ville in COMMUNES
-                ):
-                    continue
+ZONES_EXCLUES = [
+    "vienne",
+    "haute-vienne",
+    "gironde",
+    "dordogne",
+    "pyrenees",
+    "paris",
+    "nouvelle-aquitaine"
+]
+
+
+if any(
+    zone in texte
+    for zone in ZONES_EXCLUES
+):
+    continue
 
 
                 events.append(
