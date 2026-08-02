@@ -28,24 +28,20 @@ MOTS_EXCLUS = [
     "connexion",
     "inscription",
     "politique",
-    "agenda/",
-    "departement",
-    "region",
-    "charente-maritime",
-    "pyrenees",
-    "cgv"
     "guide",
-"email",
-"recevoir",
-"agenda",
-"application",
-"newsletter"
+    "email",
+    "recevoir",
+    "newsletter",
+    "cgv",
+    "charente-maritime",
+    "pyrenees"
 ]
 
 
 def get_events():
 
     events = []
+
 
     for source in SOURCES:
 
@@ -58,6 +54,7 @@ def get_events():
                     "User-Agent": "Mozilla/5.0"
                 }
             )
+
 
             response.raise_for_status()
 
@@ -101,12 +98,20 @@ def get_events():
 
                 if len(title) < 15:
                     continue
-                    
-# Garder uniquement les fiches événements Fest.fr
-if "fest.fr" in url:
 
-    if not url.rstrip(".html").split("-")[-1].isdigit():
-        continue
+
+                # Garder uniquement les pages événements Fest.fr
+                if "fest.fr" in url:
+
+                    dernier = url.split("-")[-1]
+
+                    if not dernier.replace(
+                        ".html",
+                        ""
+                    ).isdigit():
+
+                        continue
+
 
                 events.append(
                     {
@@ -136,7 +141,7 @@ def clean_events(events):
     seen = set()
 
 
-    for event in events:
+    for event in events):
 
         cle = hashlib.md5(
             event["title"]
@@ -174,7 +179,7 @@ def create_rss(events):
 
 
     fg.description(
-        "Manifestations et sorties autour de Cognac"
+        "Manifestations et sorties à venir autour de Cognac"
     )
 
 
@@ -190,19 +195,21 @@ def create_rss(events):
         )
 
 
+        # Pas de lien affiché dans le RSS
+
 
         item.description(
             f"""
             <h3>{html.escape(event['title'])}</h3>
 
             <p>
-            Découvrez cette manifestation
-            à venir autour de Cognac.
+            Découvrez cette manifestation à venir
+            autour de Cognac.
             </p>
 
             <p>
-            Retrouvez toutes les informations
-            pratiques de l'événement.
+            Retrouvez les informations pratiques :
+            date, horaires et lieu de l'événement.
             </p>
 
             <p>
@@ -225,6 +232,7 @@ def create_rss(events):
 
 if __name__ == "__main__":
 
+
     print(
         "Recherche des manifestations..."
     )
@@ -235,7 +243,7 @@ if __name__ == "__main__":
 
     print(
         len(events),
-        "éléments trouvés"
+        "événements trouvés"
     )
 
 
@@ -246,7 +254,7 @@ if __name__ == "__main__":
 
     print(
         len(events),
-        "éléments après nettoyage"
+        "événements après nettoyage"
     )
 
 
