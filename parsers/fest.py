@@ -41,7 +41,25 @@ def recuperer_fest():
                 URL,
                 lien["href"]
             )
+EXCLUS = [
+    "installation",
+    "contact",
+    "faq",
+    "cgv",
+    "confidentialite",
+    "mentions",
+    "regles",
+    "politique",
+    "newsletter",
+    "guide"
+]
 
+
+if any(
+    mot in url.lower()
+    for mot in EXCLUS
+):
+    continue
 
             titre = lien.get_text(
                 " ",
@@ -62,8 +80,8 @@ def recuperer_fest():
                 continue
 
 
-            if not url.endswith(".html"):
-                continue
+if "-20" not in url:
+    continue
 
 
             events.append(
