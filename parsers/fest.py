@@ -2,16 +2,30 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
-from utils import nettoyer_titre, nettoyer_texte
+from utils import nettoyer_titre
 
 
 URL = "https://www.fest.fr/agenda/charente/cognac"
 
 
+EXCLUS = [
+    "installation",
+    "contact",
+    "faq",
+    "cgv",
+    "confidentialite",
+    "mentions",
+    "regles",
+    "politique",
+    "newsletter",
+    "guide",
+    "agenda-email"
+]
+
+
 def recuperer_fest():
 
     events = []
-
 
     try:
 
@@ -24,7 +38,6 @@ def recuperer_fest():
         )
 
         response.raise_for_status()
-
 
         soup = BeautifulSoup(
             response.text,
@@ -41,25 +54,27 @@ def recuperer_fest():
                 URL,
                 lien["href"]
             )
-EXCLUS = [
-    "installation",
-    "contact",
-    "faq",
-    "cgv",
-    "confidentialite",
-    "mentions",
-    "regles",
-    "politique",
-    "newsletter",
-    "guide"
-]
 
 
-if any(
-    mot in url.lower()
-    for mot in EXCLUS
-):
-    continue
+            # Suppression des pages inutiles Fest
+            if any(
+                mot in url.lower()
+                for mot in EXCLUS
+            ):
+                continue
+
+
+            # Garder uniquement les fiches événements
+            if not url.endswith(".html"):
+                continue
+
+
+            if not any(
+                caractere.isdigit()
+                for caractere in url
+            ):
+                continue
+
 
             titre = lien.get_text(
                 " ",
@@ -74,14 +89,6 @@ if any(
 
             if len(titre) < 10:
                 continue
-
-
-            if "fest.fr" not in url:
-                continue
-
-
-if "-20" not in url:
-    continue
 
 
             events.append(
