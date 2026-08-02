@@ -125,7 +125,7 @@ def clean_events(events):
     seen = set()
 
 
-    for event in events):
+    for event in events:
 
         cle = hashlib.md5(
             event["title"]
