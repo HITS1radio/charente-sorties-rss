@@ -87,7 +87,7 @@ def create_rss(events):
     )
 
     fg.link(
-        href="https://ton-compte.github.io/charente-sorties-rss/rss.xml"
+        href="https://hits1radio.github.io/charente-sorties-rss/rss.xml"
     )
 
     fg.description(
@@ -111,7 +111,7 @@ def create_rss(events):
         )
 
         fe.pubDate(
-            datetime.now()
+            datetime.now(timezone.utc)
         )
 
     fg.rss_file(
