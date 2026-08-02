@@ -2,20 +2,12 @@ import requests
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
 from datetime import datetime, timezone
+from urllib.parse import urljoin
 import hashlib
 import html
-from urllib.parse import urljoin
 
 
 SOURCES = [
-    {
-        "name": "Destination Cognac",
-        "url": "https://www.destination-cognac.com/agenda-cognac/"
-    },
-    {
-        "name": "Agenda Culturel Charente",
-        "url": "https://16.agendaculturel.fr/"
-    },
     {
         "name": "Fest Charente",
         "url": "https://www.fest.fr/agenda/charente/"
@@ -23,43 +15,31 @@ SOURCES = [
 ]
 
 
-COMMUNES = [
-    "cognac",
-    "chateaubernard",
-    "châteaubernard",
-    "jarnac",
-    "segonzac",
-    "cherves",
-    "cherves-richemont",
-    "merpins",
-    "boutiers",
-    "bourg-charente",
-    "gensac",
-    "saint-laurent"
+MOTS_EXCLUS = [
+    "installer",
+    "application",
+    "faq",
+    "conditions",
+    "confidentialite",
+    "confidentialité",
+    "mentions",
+    "regles",
+    "règles",
+    "connexion",
+    "inscription",
+    "politique",
+    "agenda/",
+    "departement",
+    "region",
+    "charente-maritime",
+    "pyrenees",
+    "cgv"
 ]
+
 
 def get_events():
 
     events = []
-
-    mots_exclus = [
-        "installer",
-        "application",
-        "faq",
-        "conditions",
-        "confidentialite",
-        "confidentialité",
-        "mentions",
-        "regles",
-        "règles",
-        "connexion",
-        "inscription",
-        "politique",
-        "charente-maritime",
-        "pyrenees",
-        "departement",
-        "region"
-    ]
 
     for source in SOURCES:
 
@@ -75,17 +55,23 @@ def get_events():
 
             response.raise_for_status()
 
+
             soup = BeautifulSoup(
                 response.text,
                 "lxml"
             )
 
-            for link in soup.find_all("a", href=True):
+
+            for link in soup.find_all(
+                "a",
+                href=True
+            ):
 
                 title = link.get_text(
                     " ",
                     strip=True
                 )
+
 
                 url = urljoin(
                     source["url"],
@@ -102,7 +88,7 @@ def get_events():
 
                 if any(
                     mot in texte
-                    for mot in mots_exclus
+                    for mot in MOTS_EXCLUS
                 ):
                     continue
 
@@ -122,13 +108,42 @@ def get_events():
         except Exception as error:
 
             print(
-                "Erreur source :",
+                "Source ignorée :",
                 source["name"],
                 error
             )
 
 
     return events
+
+
+
+def clean_events(events):
+
+    result = []
+
+    seen = set()
+
+
+    for event in events):
+
+        cle = hashlib.md5(
+            event["title"]
+            .lower()
+            .encode("utf-8")
+        ).hexdigest()
+
+
+        if cle in seen:
+            continue
+
+
+        seen.add(cle)
+
+        result.append(event)
+
+
+    return result
 
 
 
@@ -148,7 +163,7 @@ def create_rss(events):
 
 
     fg.description(
-        "Les manifestations et sorties à venir autour de Cognac"
+        "Manifestations et sorties autour de Cognac"
     )
 
 
@@ -174,18 +189,17 @@ def create_rss(events):
             <h3>{html.escape(event['title'])}</h3>
 
             <p>
-            Découvrez cette manifestation à venir
-            autour de Cognac.
+            Découvrez cette manifestation
+            à venir autour de Cognac.
             </p>
 
             <p>
-            Retrouvez les informations pratiques :
-            date, horaires, lieu et conditions d'accès
-            sur la page de l'événement.
+            Retrouvez toutes les informations
+            pratiques de l'événement.
             </p>
 
             <p>
-            Agenda local des sorties du territoire.
+            Agenda local des sorties.
             </p>
             """
         )
