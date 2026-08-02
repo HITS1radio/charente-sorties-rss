@@ -34,6 +34,12 @@ MOTS_EXCLUS = [
     "charente-maritime",
     "pyrenees",
     "cgv"
+    "guide",
+"email",
+"recevoir",
+"agenda",
+"application",
+"newsletter"
 ]
 
 
@@ -95,7 +101,12 @@ def get_events():
 
                 if len(title) < 15:
                     continue
+                    
+# Garder uniquement les fiches événements Fest.fr
+if "fest.fr" in url:
 
+    if not url.rstrip(".html").split("-")[-1].isdigit():
+        continue
 
                 events.append(
                     {
@@ -178,10 +189,6 @@ def create_rss(events):
             )
         )
 
-
-        item.link(
-            href=event["url"]
-        )
 
 
         item.description(
