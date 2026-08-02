@@ -11,15 +11,30 @@ SOURCES = [
     {
         "name": "Fest Charente",
         "url": "https://www.fest.fr/agenda/charente/"
-    }
-        {
+    },
+    {
         "name": "Destination Cognac",
         "url": "https://www.destination-cognac.com/agenda-cognac/"
     },
     {
-        "name": "Agenda Culturel Charente",
-        "url": "https://16.agendaculturel.fr/"
-    },
+        "name": "Grand Cognac",
+        "url": "https://www.grand-cognac.fr/decouvrir-et-sortir/agenda-des-sorties"
+    }
+]
+
+
+COMMUNES = [
+    "cognac",
+    "chateaubernard",
+    "châteaubernard",
+    "jarnac",
+    "segonzac",
+    "merpins",
+    "cherves",
+    "cherves-richemont",
+    "boutiers",
+    "saint-laurent",
+    "salignac"
 ]
 
 
@@ -37,13 +52,11 @@ MOTS_EXCLUS = [
     "inscription",
     "politique",
     "guide",
-    "email",
-    "recevoir",
     "newsletter",
+    "recevoir",
     "cgv",
     "charente-maritime",
-    "pyrenees",
-    "agenda/charente"
+    "pyrenees"
 ]
 
 
@@ -56,7 +69,6 @@ def nettoyer_titre(title):
 
 
     if " » " in title:
-
         title = title.split(
             " » "
         )[0]
@@ -82,7 +94,6 @@ def get_events():
                     "User-Agent": "Mozilla/5.0"
                 }
             )
-
 
             response.raise_for_status()
 
@@ -122,6 +133,8 @@ def get_events():
                 )
 
 
+                # Suppression des pages inutiles
+
                 if any(
                     mot in texte
                     for mot in MOTS_EXCLUS
@@ -133,23 +146,20 @@ def get_events():
                     continue
 
 
-                # Garder uniquement les fiches événements Fest.fr
-                if "fest.fr" in url:
+                # Filtre Cognac et alentours
 
-                    dernier = url.split("-")[-1]
-
-                    if not dernier.replace(
-                        ".html",
-                        ""
-                    ).isdigit():
-
-                        continue
+                if not any(
+                    ville in texte
+                    for ville in COMMUNES
+                ):
+                    continue
 
 
                 events.append(
                     {
                         "title": title,
-                        "url": url
+                        "url": url,
+                        "source": source["name"]
                     }
                 )
 
@@ -230,7 +240,11 @@ def create_rss(events):
         )
 
 
-        # Pas de balise link volontairement
+        # Le lien est conservé dans le RSS
+
+        item.link(
+            href=event["url"]
+        )
 
 
         item.description(
@@ -246,10 +260,13 @@ def create_rss(events):
             </p>
 
             <p>
-            Retrouvez les informations pratiques
-            de cette sortie auprès de l'organisateur.
+            Retrouvez toutes les informations pratiques :
+            date, horaires et lieu de l'événement.
             </p>
 
+            <p>
+            Agenda local des sorties.
+            </p>
             """
         )
 
@@ -268,7 +285,6 @@ def create_rss(events):
 
 
 if __name__ == "__main__":
-
 
     print(
         "Recherche des manifestations..."
