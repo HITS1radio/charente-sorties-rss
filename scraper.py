@@ -173,12 +173,26 @@ def create_rss(events):
             href=event["url"]
         )
 
-        item.description(
-            f"""
-            Manifestation locale<br>
-            Source : {event['source']}
-            """
-        )
+item.description(
+    f"""
+    <h3>{html.escape(event['title'])}</h3>
+
+    <p>
+    Découvrez cette manifestation à venir autour de Cognac :
+    un événement local à ne pas manquer.
+    </p>
+
+    <p>
+    Retrouvez toutes les informations pratiques
+    (date, horaires, lieu et conditions d'accès)
+    directement dans la page de l'événement.
+    </p>
+
+    <p>
+    Agenda des sorties du secteur de Cognac.
+    </p>
+    """
+)
 
         item.pubDate(
             datetime.now(timezone.utc)
