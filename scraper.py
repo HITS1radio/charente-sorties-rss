@@ -34,8 +34,28 @@ MOTS_EXCLUS = [
     "newsletter",
     "cgv",
     "charente-maritime",
-    "pyrenees"
+    "pyrenees",
+    "agenda/charente"
 ]
+
+
+def nettoyer_titre(title):
+
+    title = title.replace(
+        "\n",
+        " "
+    ).strip()
+
+
+    if " » " in title:
+
+        title = title.split(
+            " » "
+        )[0]
+
+
+    return title
+
 
 
 def get_events():
@@ -76,6 +96,11 @@ def get_events():
                 )
 
 
+                title = nettoyer_titre(
+                    title
+                )
+
+
                 url = urljoin(
                     source["url"],
                     link["href"]
@@ -100,7 +125,7 @@ def get_events():
                     continue
 
 
-                # Garder uniquement les pages événements Fest.fr
+                # Garder uniquement les fiches événements Fest.fr
                 if "fest.fr" in url:
 
                     dernier = url.split("-")[-1]
@@ -156,7 +181,9 @@ def clean_events(events):
 
         seen.add(cle)
 
-        result.append(event)
+        result.append(
+            event
+        )
 
 
     return result
@@ -195,32 +222,34 @@ def create_rss(events):
         )
 
 
-        # Pas de lien affiché dans le RSS
+        # Pas de balise link volontairement
 
 
         item.description(
             f"""
-            <h3>{html.escape(event['title'])}</h3>
-
             <p>
-            Découvrez cette manifestation à venir
-            autour de Cognac.
+            <strong>
+            {html.escape(event['title'])}
+            </strong>
             </p>
 
             <p>
-            Retrouvez les informations pratiques :
-            date, horaires et lieu de l'événement.
+            Manifestation à venir autour de Cognac.
             </p>
 
             <p>
-            Agenda local des sorties.
+            Retrouvez les informations pratiques
+            de cette sortie auprès de l'organisateur.
             </p>
+
             """
         )
 
 
         item.pubDate(
-            datetime.now(timezone.utc)
+            datetime.now(
+                timezone.utc
+            )
         )
 
 
