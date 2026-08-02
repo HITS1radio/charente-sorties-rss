@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
-from datetime import datetime
+from datetime import datetime, timezone
 from dateutil import parser
 import hashlib
 import html
