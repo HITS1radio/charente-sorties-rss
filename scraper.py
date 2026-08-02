@@ -63,16 +63,47 @@ def get_events():
             )
 
 
-            for link in soup.find_all("a", href=True):
+for link in soup.find_all("a", href=True):
 
-                title = link.get_text(
-                    " ",
-                    strip=True
-                )
+    title = link.get_text(
+        " ",
+        strip=True
+    )
+
+    url = link["href"].lower()
 
 
-                if len(title) < 15:
-                    continue
+    # Ignore les liens inutiles
+    mots_exclus = [
+        "installer",
+        "application",
+        "faq",
+        "conditions",
+        "confidentialite",
+        "confidentialité",
+        "mentions",
+        "regles",
+        "règles",
+        "connexion",
+        "inscription",
+        "agenda/",
+        "departement",
+        "region",
+        "charente-maritime",
+        "pyrenees",
+        "politique"
+    ]
+
+
+    if any(
+        mot in title.lower() or mot in url
+        for mot in mots_exclus
+    ):
+        continue
+
+
+    if len(title) < 15:
+        continue
 
 
                 url = urljoin(
