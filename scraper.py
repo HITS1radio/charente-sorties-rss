@@ -38,10 +38,28 @@ COMMUNES = [
     "saint-laurent"
 ]
 
-
 def get_events():
 
     events = []
+
+    mots_exclus = [
+        "installer",
+        "application",
+        "faq",
+        "conditions",
+        "confidentialite",
+        "confidentialité",
+        "mentions",
+        "regles",
+        "règles",
+        "connexion",
+        "inscription",
+        "politique",
+        "charente-maritime",
+        "pyrenees",
+        "departement",
+        "region"
+    ]
 
     for source in SOURCES:
 
@@ -62,54 +80,35 @@ def get_events():
                 "lxml"
             )
 
+            for link in soup.find_all("a", href=True):
 
-for link in soup.find_all("a", href=True):
-
-    title = link.get_text(
-        " ",
-        strip=True
-    )
-
-    url = link["href"].lower()
-
-
-    # Ignore les liens inutiles
-    mots_exclus = [
-        "installer",
-        "application",
-        "faq",
-        "conditions",
-        "confidentialite",
-        "confidentialité",
-        "mentions",
-        "regles",
-        "règles",
-        "connexion",
-        "inscription",
-        "agenda/",
-        "departement",
-        "region",
-        "charente-maritime",
-        "pyrenees",
-        "politique"
-    ]
-
-
-    if any(
-        mot in title.lower() or mot in url
-        for mot in mots_exclus
-    ):
-        continue
-
-
-    if len(title) < 15:
-        continue
-
+                title = link.get_text(
+                    " ",
+                    strip=True
+                )
 
                 url = urljoin(
                     source["url"],
                     link["href"]
                 )
+
+
+                texte = (
+                    title.lower()
+                    + " "
+                    + url.lower()
+                )
+
+
+                if any(
+                    mot in texte
+                    for mot in mots_exclus
+                ):
+                    continue
+
+
+                if len(title) < 15:
+                    continue
 
 
                 events.append(
@@ -130,48 +129,6 @@ for link in soup.find_all("a", href=True):
 
 
     return events
-
-
-
-def is_local(event):
-
-    text = event["title"].lower()
-
-    for commune in COMMUNES:
-
-        if commune in text:
-            return True
-
-    return False
-
-
-
-def clean_events(events):
-
-    cleaned = []
-
-    seen = set()
-
-
-    for event in events:
-
-        key = hashlib.md5(
-            event["title"]
-            .lower()
-            .encode("utf-8")
-        ).hexdigest()
-
-
-        if key in seen:
-            continue
-
-
-        seen.add(key)
-
-        cleaned.append(event)
-
-
-    return cleaned
 
 
 
