@@ -2,10 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 from feedgen.feed import FeedGenerator
 from datetime import datetime, timezone
-from dateutil import parser
 import hashlib
 import html
-import re
+from urllib.parse import urljoin
 
 
 SOURCES = [
@@ -40,7 +39,7 @@ COMMUNES = [
 ]
 
 
-def get_pages():
+def get_events():
 
     events = []
 
@@ -56,10 +55,13 @@ def get_pages():
                 }
             )
 
+            response.raise_for_status()
+
             soup = BeautifulSoup(
                 response.text,
                 "lxml"
             )
+
 
             for link in soup.find_all("a", href=True):
 
@@ -68,26 +70,29 @@ def get_pages():
                     strip=True
                 )
 
-                if len(title) < 10:
+
+                if len(title) < 15:
                     continue
 
-                url = link["href"]
 
-                if url.startswith("/"):
-                    url = source["url"].split("/",3)[0] + "//" + source["url"].split("/",3)[2] + url
+                url = urljoin(
+                    source["url"],
+                    link["href"]
+                )
 
 
                 events.append(
                     {
                         "title": title,
-                        "url": url,
-                        "source": source["name"]
+                        "url": url
                     }
                 )
+
 
         except Exception as error:
 
             print(
+                "Erreur source :",
                 source["name"],
                 error
             )
@@ -99,32 +104,30 @@ def get_pages():
 
 def is_local(event):
 
-    text = (
-        event["title"]
-        .lower()
-    )
+    text = event["title"].lower()
 
-    return any(
-        commune in text
-        for commune in COMMUNES
-    )
+    for commune in COMMUNES:
 
+        if commune in text:
+            return True
+
+    return False
 
 
-def clean(events):
 
-    today = datetime.now(
-        timezone.utc
-    )
+def clean_events(events):
 
-    final = []
+    cleaned = []
+
     seen = set()
 
 
     for event in events:
 
         key = hashlib.md5(
-            event["title"].lower().encode()
+            event["title"]
+            .lower()
+            .encode("utf-8")
         ).hexdigest()
 
 
@@ -134,11 +137,10 @@ def clean(events):
 
         seen.add(key)
 
+        cleaned.append(event)
 
-        final.append(event)
 
-
-    return final
+    return cleaned
 
 
 
@@ -146,16 +148,19 @@ def create_rss(events):
 
     fg = FeedGenerator()
 
+
     fg.title(
         "Sorties autour de Cognac"
     )
+
 
     fg.link(
         href="https://hits1radio.github.io/charente-sorties-rss/rss.xml"
     )
 
+
     fg.description(
-        "Manifestations à venir autour de Cognac et du Grand Cognac"
+        "Les manifestations et sorties à venir autour de Cognac"
     )
 
 
@@ -163,36 +168,40 @@ def create_rss(events):
 
         item = fg.add_entry()
 
+
         item.title(
             html.escape(
                 event["title"]
             )
         )
 
+
         item.link(
             href=event["url"]
         )
 
-item.description(
-    f"""
-    <h3>{html.escape(event['title'])}</h3>
 
-    <p>
-    Découvrez cette manifestation à venir autour de Cognac :
-    un événement local à ne pas manquer.
-    </p>
+        item.description(
+            f"""
+            <h3>{html.escape(event['title'])}</h3>
 
-    <p>
-    Retrouvez toutes les informations pratiques
-    (date, horaires, lieu et conditions d'accès)
-    directement dans la page de l'événement.
-    </p>
+            <p>
+            Découvrez cette manifestation à venir
+            autour de Cognac.
+            </p>
 
-    <p>
-    Agenda des sorties du secteur de Cognac.
-    </p>
-    """
-)
+            <p>
+            Retrouvez les informations pratiques :
+            date, horaires, lieu et conditions d'accès
+            sur la page de l'événement.
+            </p>
+
+            <p>
+            Agenda local des sorties du territoire.
+            </p>
+            """
+        )
+
 
         item.pubDate(
             datetime.now(timezone.utc)
@@ -207,13 +216,36 @@ item.description(
 
 if __name__ == "__main__":
 
-    events = get_pages()
+    print(
+        "Recherche des manifestations..."
+    )
 
-    events = clean(events)
 
-    create_rss(events)
+    events = get_events()
+
 
     print(
         len(events),
-        "événements générés"
+        "éléments trouvés"
+    )
+
+
+    events = clean_events(
+        events
+    )
+
+
+    print(
+        len(events),
+        "éléments après nettoyage"
+    )
+
+
+    create_rss(
+        events
+    )
+
+
+    print(
+        "Flux RSS créé avec succès"
     )
