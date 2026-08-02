@@ -12,6 +12,14 @@ SOURCES = [
         "name": "Fest Charente",
         "url": "https://www.fest.fr/agenda/charente/"
     }
+        {
+        "name": "Destination Cognac",
+        "url": "https://www.destination-cognac.com/agenda-cognac/"
+    },
+    {
+        "name": "Agenda Culturel Charente",
+        "url": "https://16.agendaculturel.fr/"
+    },
 ]
 
 
