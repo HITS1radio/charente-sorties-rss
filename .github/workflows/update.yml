@@ -1,0 +1,59 @@
+name: Génération RSS Charente
+
+on:
+  schedule:
+    - cron: "0 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Récupération du dépôt
+      uses: actions/checkout@v4
+
+
+    - name: Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+
+
+    - name: Dépendances
+      run: |
+        pip install -r requirements.txt
+
+
+    - name: Création RSS
+      run: |
+        python scraper.py
+
+
+    - name: Publication Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: .
+
+
+  deploy:
+
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+
+    steps:
+
+    - name: Déploiement
+      uses: actions/deploy-pages@v4
